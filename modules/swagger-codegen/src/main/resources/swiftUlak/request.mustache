@@ -1,0 +1,49 @@
+{{#operation}}//
+//  {{operationIdCamelCase}}Request.swift
+//  {{projectName}}
+//
+//  Copyright (c) 2018 Commencis. All rights reserved.
+//
+//  Save to the extent permitted by law, you may not use, copy, modify,
+//  distribute or create derivative works of this material or any part
+//  of it without the prior written consent of Commencis.
+//  Any reproduction of this material must contain this notice.
+//
+
+import Ulak
+
+
+struct {{operationIdCamelCase}}Request: BaseRequest{{#bodyParams}}, BodyEncodableRequest{{/bodyParams}} {
+
+    let path = "{{{path}}}"
+{{#hasQueryParams}}
+    let urlParameters: JSONDictionary?
+{{/hasQueryParams}}
+    let method: HTTPMethod = {{httpMethod}}
+{{#bodyParams}}
+    let encodableBody: {{dataType}}
+{{/bodyParams}}
+{{#pathParams}}
+    let {{paramName}}: {{dataType}}
+{{/pathParams}}
+
+    init({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}{{{datatypeWithEnum}}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{#hasMore}},
+         {{/hasMore}}{{/allParams}})
+    {
+{{#hasQueryParams}}
+        urlParameters = [
+    {{#queryParams}}
+            "{{paramName}}": {{paramName}}
+    {{/queryParams}}
+        ]
+{{/hasQueryParams}}
+{{#bodyParams}}
+        encodableBody = {{paramName}}
+{{/bodyParams}}
+{{#pathParams}}
+        self.{{paramName}} = {{paramName}}
+{{/pathParams}}
+    }
+}
+
+{{/operation}}

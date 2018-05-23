@@ -5,6 +5,7 @@ import com.samskivert.mustache.Template;
 import io.swagger.codegen.ignore.CodegenIgnoreProcessor;
 import io.swagger.codegen.languages.AbstractJavaCodegen;
 import io.swagger.codegen.utils.ImplementationVersion;
+import io.swagger.codegen.utils.TemplateToFileProcessor;
 import io.swagger.models.*;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
@@ -424,7 +425,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
 
     }
 
-    private void generateApis(List<File> files, List<Object> allOperations, List<Object> allModels) {
+    private void generateApis(final List<File> files, List<Object> allOperations, List<Object> allModels) {
         if (!generateApis) {
             return;
         }
@@ -443,7 +444,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
             }
             paths = updatedPaths;
         }
-        for (String tag : paths.keySet()) {
+        for (final String tag : paths.keySet()) {
             try {
                 List<CodegenOperation> ops = paths.get(tag);
                 Collections.sort(ops, new Comparator<CodegenOperation>() {
@@ -535,6 +536,23 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
                     }
                 }
 
+                config.generateCustomApis(operation, new TemplateToFileProcessor() {
+                    @Override
+                    public void processTemplate(Map<String, Object> templateData,
+                                                      String templateName,
+                                                      String outputFilename) {
+                        File written = null;
+                        try {
+                            written = processTemplateToFile(templateData, templateName, outputFilename);
+                        } catch (Exception e) {
+                            throw new RuntimeException("Could not generate api file for '" + tag + "'", e);
+                        }
+                        if (written != null) {
+                            files.add(written);
+                        }
+                    }
+                });
+
             } catch (Exception e) {
                 throw new RuntimeException("Could not generate api file for '" + tag + "'", e);
             }
@@ -547,7 +565,7 @@ public class DefaultGenerator extends AbstractGenerator implements Generator {
     }
 
     private void generateSupportingFiles(List<File> files, Map<String, Object> bundle) {
-        if (!generateSupportingFiles) {
+        if (!generateSupportingFiles || config.supportingFiles().isEmpty()) {
             return;
         }
         Set<String> supportingFilesToGenerate = null;

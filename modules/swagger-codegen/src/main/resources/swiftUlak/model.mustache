@@ -1,0 +1,69 @@
+{{#models}}{{#model}}//
+//  {{classname}}.swift
+//  {{projectName}}
+//
+//  Copyright (c) 2018 Commencis. All rights reserved.
+//
+//  Save to the extent permitted by law, you may not use, copy, modify,
+//  distribute or create derivative works of this material or any part
+//  of it without the prior written consent of Commencis.
+//  Any reproduction of this material must contain this notice.
+//
+
+import Foundation
+
+{{#description}}
+
+/** {{description}} */{{/description}}
+{{#isArrayModel}}
+public typealias {{classname}} = {{parent}}
+{{/isArrayModel}}
+{{^isArrayModel}}
+{{#isEnum}}
+public enum {{classname}}: {{dataType}}, Codable {
+{{#allowableValues}}{{#enumVars}}    case {{name}} = "{{{value}}}"
+{{/enumVars}}{{/allowableValues}}
+}
+{{/isEnum}}
+{{^isEnum}}
+
+struct {{classname}}: {{#parent}}{{{parent}}}{{/parent}}{{^parent}}BaseModel{{/parent}} {
+
+{{#vars}}
+{{#isEnum}}
+    public enum {{enumName}}: {{^isContainer}}{{datatype}}{{/isContainer}}{{#isContainer}}String{{/isContainer}}, Codable { {{#allowableValues}}{{#enumVars}}
+        case {{name}} = {{#isContainer}}"{{/isContainer}}{{#isString}}"{{/isString}}{{{value}}}{{#isString}}"{{/isString}}{{#isContainer}}"{{/isContainer}}{{/enumVars}}{{/allowableValues}}
+    }
+{{/isEnum}}
+{{/vars}}
+{{#vars}}
+{{#isEnum}}
+    {{#description}}/** {{description}} */
+    {{/description}}public var {{name}}: {{{datatypeWithEnum}}}{{^required}}?{{/required}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}
+{{/isEnum}}
+{{^isEnum}}
+    {{#description}}/** {{description}} */
+    {{/description}}public var {{name}}: {{{datatype}}}{{^required}}?{{/required}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{#objcCompatible}}{{#vendorExtensions.x-swift-optional-scalar}}
+    public var {{name}}Num: NSNumber? {
+        get {
+            return {{name}}.map({ return NSNumber(value: $0) })
+        }
+    }{{/vendorExtensions.x-swift-optional-scalar}}{{/objcCompatible}}
+{{/isEnum}}
+{{/vars}}
+
+    {{^parent}}{{#hasVars}}
+    public init({{#vars}}{{name}}: {{{datatypeWithEnum}}}{{^required}}? = nil{{/required}}{{#hasMore}},
+                {{/hasMore}}{{/vars}})
+    {
+        {{#vars}}
+        self.{{name}} = {{name}}
+        {{/vars}}
+    }
+    {{/hasVars}}{{/parent}}
+}
+
+{{/isEnum}}
+{{/isArrayModel}}
+{{/model}}
+{{/models}}
