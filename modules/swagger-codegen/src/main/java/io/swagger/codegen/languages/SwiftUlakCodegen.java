@@ -69,6 +69,8 @@ public class SwiftUlakCodegen extends Swift4Codegen {
 
     public SwiftUlakCodegen() {
         super();
+        typeMapping.put("Currency", "String");
+        typeMapping.put("LocalDateTime", "Date");
         outputFolder = "generated-code" + File.separator + "swift";
         modelTemplateFiles.put("model.mustache", ".swift");
         requestTemplateFiles.put("request.mustache", ".swift");
